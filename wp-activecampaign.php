@@ -8,16 +8,26 @@
  * Author URI: https://wpsuperstar.com/
  */
 
-// Runs when the plugin is activated
+// Runs when the plugin is activated.
+register_activation_hook( __FILE__, 'WP_ActiveCampaign::plugin_activation' );
+// Runs when the plugin is deactivated.
+register_deactivation_hook( __FILE__, 'WP_ActiveCampaign::plugin_deactivation' );
 
-register_activation_hook( __FILE__, [ 'WP_ActiveCampaign', 'plugin_activation' ] );
-// Runs when the plugin is deactivated
-register_deactivation_hook( __FILE__, [ 'WP_ActiveCampaign', 'plugin_deactivation' ] );
-
+/**
+ * Class WP_ActiveCampaign
+ */
 class WP_ActiveCampaign {
 
-	protected static $_instance;
+	/**
+	 * Instance of this class
+	 *
+	 * @var $instance
+	 */
+	protected static $instance;
 
+	/**
+	 * WP_ActiveCampaign constructor.
+	 */
 	public function __construct() {
 
 		$this->includes();
@@ -30,13 +40,18 @@ class WP_ActiveCampaign {
 
 	}
 
-	public static function instance() {
+	/**
+	 * Retrieve instance of this class
+	 *
+	 * @return WP_ActiveCampaign
+	 */
+	public static function instance(): WP_ActiveCampaign {
 
-		if ( null === self::$_instance ) {
-			self::$_instance = new self();
+		if ( null === self::$instance ) {
+			self::$instance = new self();
 		}
 
-		return self::$_instance;
+		return self::$instance;
 
 	}
 
@@ -89,13 +104,13 @@ class WP_ActiveCampaign {
 	public static function is_request( $type ): bool {
 
 		switch ( $type ) {
-			case 'admin' :
+			case 'admin':
 				return is_admin();
-			case 'ajax' :
+			case 'ajax':
 				return defined( 'DOING_AJAX' );
-			case 'cron' :
+			case 'cron':
 				return defined( 'DOING_CRON' );
-			case 'frontend' :
+			case 'frontend':
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' );
 		}
 
@@ -105,6 +120,7 @@ class WP_ActiveCampaign {
 }
 
 add_action( 'plugins_loaded', 'load_active_campaign' );
+//phpcs:ignore
 function load_active_campaign() {
 	return WP_ActiveCampaign::instance();
 }
