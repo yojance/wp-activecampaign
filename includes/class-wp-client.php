@@ -14,7 +14,7 @@ use WP_Error;
 /**
  * Class Client
  *
- * @package KO\ActiveCampaign
+ * @package WPS\ActiveCampaign
  */
 class WP_Client {
 
