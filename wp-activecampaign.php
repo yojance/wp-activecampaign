@@ -38,6 +38,12 @@ class WP_ActiveCampaign {
 	 */
 	public function includes() {
 
+		require_once __DIR__ . '/includes/class-wp-client.php';
+		require_once __DIR__ . '/includes/class-resource.php';
+		require_once __DIR__ . '/includes/class-contacts.php';
+		require_once __DIR__ . '/includes/class-custom-fields.php';
+		require_once __DIR__ . '/includes/class-tags.php';
+
 	}
 
 	/**
