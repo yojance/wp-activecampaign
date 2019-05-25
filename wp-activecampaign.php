@@ -43,6 +43,7 @@ class WP_ActiveCampaign {
 		require_once __DIR__ . '/includes/class-contacts.php';
 		require_once __DIR__ . '/includes/class-custom-fields.php';
 		require_once __DIR__ . '/includes/class-tags.php';
+		require_once __DIR__ . '/includes/class-addresses.php';
 
 	}
 
