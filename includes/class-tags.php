@@ -9,9 +9,9 @@
 
 namespace WPS\ActiveCampaign;
 
+use WP_Error;
+
 /**
- * Class Tags
- *
  * Tags
  *
  * A contact can have any number of tags applied to them.
@@ -26,6 +26,19 @@ namespace WPS\ActiveCampaign;
 class Tags extends Resource {
 
 	/**
+	 * Tags constructor.
+	 *
+	 * @param WP_Client $client HTTP Client.
+	 */
+	public function __construct( $client ) {
+
+		$this->resource = 'tags';
+
+		parent::__construct( $client );
+
+	}
+
+	/**
 	 * Create a tag
 	 *
 	 * A 201 response code is returned when it is initially created.
@@ -33,12 +46,12 @@ class Tags extends Resource {
 	 *
 	 * @param array $data Tag data.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function create( array $data ) {
 
 		return $this->get_client()->post(
-			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'tags' ),
+			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), $this->resource ),
 			[ 'tag' => $data ]
 		);
 
@@ -49,12 +62,12 @@ class Tags extends Resource {
 	 *
 	 * @param int $id ID of the tag to retrieve.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function get( int $id ) {
 
 		return $this->get_client()->get(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'tags', $id )
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $id )
 		);
 
 	}
@@ -65,16 +78,16 @@ class Tags extends Resource {
 	 *
 	 * A 200 response code is returned when the tags is updated successfully.
 	 *
-	 * @param int   $id           ID of the tag to update.
-	 * @param array $updated_data Updated data.
+	 * @param int   $id      ID of the tag to update.
+	 * @param array $updates Updated data.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
-	public function update( int $id, array $updated_data ) {
+	public function update( int $id, array $updates ) {
 
 		return $this->get_client()->put(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'tags', $id ),
-			[ 'tag' => $updated_data ]
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $id ),
+			[ 'tag' => $updates ]
 		);
 
 	}
@@ -84,12 +97,12 @@ class Tags extends Resource {
 	 *
 	 * @param int $id ID of the tag to remove.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function delete( int $id ) {
 
 		return $this->get_client()->delete(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'tags', $id )
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $id )
 		);
 
 	}
@@ -97,12 +110,12 @@ class Tags extends Resource {
 	/**
 	 * List all tags
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
-	public function list_all() {
+	public function list() {
 
 		return $this->get_client()->get(
-			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'tags' )
+			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), $this->resource )
 		);
 
 	}
@@ -113,16 +126,16 @@ class Tags extends Resource {
 	 * @param int $tag_id     Tag's id.
 	 * @param int $contact_id Contact's id.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function create_contact_tag( int $tag_id, int $contact_id ) {
 
-		$data['contactTag']['tag']     = $tag_id;
-		$data['contactTag']['contact'] = $contact_id;
+		$data['tag']     = $tag_id;
+		$data['contact'] = $contact_id;
 
 		return $this->get_client()->post(
 			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'contactTags' ),
-			$data
+			[ 'contactTag' => $data ]
 		);
 
 	}
@@ -132,7 +145,7 @@ class Tags extends Resource {
 	 *
 	 * @param int $contact_id Contact ID.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function get_contact_tags( int $contact_id ) {
 
@@ -147,7 +160,7 @@ class Tags extends Resource {
 	 *
 	 * @param int $unique_id The contactTag id.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function delete_contact_tag( $unique_id ) {
 

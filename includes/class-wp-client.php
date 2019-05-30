@@ -15,6 +15,8 @@ use WP_Error;
  * Class Client
  *
  * @package WPS\ActiveCampaign
+ * @link https://developers.activecampaign.com/reference
+ * @link https://developers.activecampaign.com/blog
  */
 class WP_Client {
 

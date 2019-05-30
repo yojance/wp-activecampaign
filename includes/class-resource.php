@@ -10,7 +10,8 @@
 namespace WPS\ActiveCampaign;
 
 /**
- * Class Resource
+ * Resource
+ *
  * Serves as a base class for all resources/endpoints
  *
  * @package WPS\ActiveCampaign
@@ -23,6 +24,13 @@ class Resource {
 	 * @var $client
 	 */
 	protected $client;
+
+	/**
+	 * Resource Key
+	 *
+	 * @var string $resource
+	 */
+	protected $resource;
 
 	/**
 	 * Contact constructor.

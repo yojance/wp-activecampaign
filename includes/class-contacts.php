@@ -13,8 +13,6 @@ use stdClass;
 use WP_Error;
 
 /**
- * Class Contact
- *
  * Contacts
  *
  * Contacts are the center of activity in ActiveCampaign and represent the people that
@@ -32,11 +30,25 @@ class Contacts extends Resource {
 	protected $tags;
 
 	/**
+	 * Automations handler
+	 *
+	 * @var Automations $automations
+	 */
+	protected $automations;
+
+	/**
 	 * Custom Fields handler.
 	 *
 	 * @var Custom_Fields $custom_fields
 	 */
 	protected $custom_fields;
+
+	/**
+	 * Custom Field Values handler.
+	 *
+	 * @var Custom_Field_Values $custom_field_values
+	 */
+	protected $custom_field_values;
 
 	/**
 	 * Contacts constructor.
@@ -45,11 +57,15 @@ class Contacts extends Resource {
 	 */
 	public function __construct( $client ) {
 
+		$this->resource = 'contacts';
+
 		parent::__construct( $client );
 
 		// Handlers.
-		$this->tags          = new Tags( $this->get_client() );
-		$this->custom_fields = new Custom_Fields( $this->get_client() );
+		$this->tags                = new Tags( $this->get_client() );
+		$this->automations         = new Automations( $this->get_client() );
+		$this->custom_fields       = new Custom_Fields( $this->get_client() );
+		$this->custom_field_values = new Custom_Field_Values( $this->get_client() );
 
 	}
 
@@ -60,19 +76,17 @@ class Contacts extends Resource {
 	 * 201: Created successfully
 	 * 422: Email address already exists in the system
 	 *
-	 * @param array $contact Contact's information.
+	 * @param array $data Contact's information.
 	 *
 	 * @return array|WP_Error
 	 * @link https://developers.activecampaign.com/reference#create-contact
 	 * @link https://gist.github.com/yojance/d538e09bba6d3d9dbf26ccf118890aca#file-contacts-create-json
 	 */
-	public function create( array $contact ) {
-
-		$data['contact'] = $contact;
+	public function create( array $data ) {
 
 		return $this->get_client()->post(
-			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'contacts' ),
-			$data
+			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), $this->resource ),
+			[ 'contact' => $data ]
 		);
 
 	}
@@ -84,18 +98,16 @@ class Contacts extends Resource {
 	 * 201: Created successfully
 	 * 422: Email address already exists in the system
 	 *
-	 * @param array $contact Contact's information.
+	 * @param array $data Contact's information.
 	 *
 	 * @return array|WP_Error
 	 * @link https://developers.activecampaign.com/reference#create-contact-sync
 	 */
-	public function sync( array $contact ) {
-
-		$data['contact'] = $contact;
+	public function sync( array $data ) {
 
 		return $this->get_client()->post(
-			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'contacts' ),
-			$data
+			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), $this->resource ),
+			[ 'contact' => $data ]
 		);
 
 	}
@@ -106,15 +118,15 @@ class Contacts extends Resource {
 	 * Code 200: Success
 	 * Code 404: No Result found for Subscriber with id %d
 	 *
-	 * @param int $contact_id Contact ID.
+	 * @param int $id Contact ID.
 	 *
 	 * @return array|WP_Error
 	 * @see https://developers.activecampaign.com/reference#get-contact
 	 */
-	public function get( int $contact_id ) {
+	public function get( int $id ) {
 
 		return $this->get_client()->get(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'contacts', $contact_id )
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $id )
 		);
 
 	}
@@ -128,7 +140,7 @@ class Contacts extends Resource {
 	 *
 	 * @return stdClass|WP_Error
 	 */
-	public function get_by( $field, $field_value ) {
+	public function get_by( string $field, $field_value ) {
 
 		// Get by ID.
 		if ( in_array( strtolower( $field ), [ 'id', 'contact_id', 'contact' ], true ) ) {
@@ -139,11 +151,49 @@ class Contacts extends Resource {
 			}
 		}
 
-		$endpoint = sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'contacts' );
+		$endpoint = sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), $this->resource );
 		$endpoint = add_query_arg( [ 'email' => rawurlencode( $field_value ) ], $endpoint );
 		$endpoint = esc_url( $endpoint );
 
 		return $this->get_client()->get( $endpoint );
+
+	}
+
+	/**
+	 * Update a contact By ID
+	 *
+	 * @param int   $contact_id Contact iD.
+	 * @param array $updates    Updated contact information.
+	 *
+	 * @return array|WP_Error
+	 * @link https://developers.activecampaign.com/reference#update-a-contact
+	 */
+	public function update( int $contact_id, array $updates ) {
+
+		return $this->get_client()->put(
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $contact_id ),
+			[ 'contact' => $updates ]
+		);
+
+	}
+
+	/**
+	 * Delete an existing contact.
+	 *
+	 * Response code:
+	 * 200: Deleted successfully
+	 * 404: No Result found for Subscriber
+	 *
+	 * @param int $id Contact ID.
+	 *
+	 * @return array|WP_Error
+	 * @link https://developers.activecampaign.com/reference#delete-contact
+	 */
+	public function delete( int $id ) {
+
+		return $this->get_client()->delete(
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $id )
+		);
 
 	}
 
@@ -156,15 +206,15 @@ class Contacts extends Resource {
 	 * @return array|WP_Error
 	 * @link https://developers.activecampaign.com/reference#update-list-status-for-contact
 	 */
-	public function subscribe( $contact_id, $list_id ) {
+	public function subscribe( int $contact_id, int $list_id ) {
 
-		$data['contactList']['status']  = 1;
-		$data['contactList']['contact'] = $contact_id;
-		$data['contactList']['list']    = $list_id;
+		$data['status']  = 1;
+		$data['contact'] = $contact_id;
+		$data['list']    = $list_id;
 
 		return $this->get_client()->post(
 			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'contactLists' ),
-			$data
+			[ 'contactList' => $data ]
 		);
 
 	}
@@ -178,55 +228,15 @@ class Contacts extends Resource {
 	 * @return array|WP_Error
 	 * @link https://developers.activecampaign.com/reference#update-list-status-for-contact
 	 */
-	public function unsubscribe( $contact_id, $list_id ) {
+	public function unsubscribe( int $contact_id, int $list_id ) {
 
-		$data['contactList']['status']  = 2;
-		$data['contactList']['contact'] = $contact_id;
-		$data['contactList']['list']    = $list_id;
+		$data['status']  = 2;
+		$data['contact'] = $contact_id;
+		$data['list']    = $list_id;
 
 		return $this->get_client()->post(
 			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'contactLists' ),
-			$data
-		);
-
-	}
-
-	/**
-	 * Update a contact By ID
-	 *
-	 * @param int   $contact_id Contact iD.
-	 * @param array $contact    Updated contact information.
-	 *
-	 * @return array|WP_Error
-	 * @link https://developers.activecampaign.com/reference#update-a-contact
-	 */
-	public function update( $contact_id, $contact ) {
-
-		$data['contact'] = $contact;
-
-		return $this->get_client()->put(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'contacts', $contact_id ),
-			$data
-		);
-
-	}
-
-	/**
-	 * Delete an existing contact.
-	 *
-	 * Response code:
-	 * 200: Deleted successfully
-	 * 404: No Result found for Subscriber
-	 *
-	 * @param int $contact_id Contact ID.
-	 *
-	 * @return array|WP_Error
-	 * @link https://developers.activecampaign.com/reference#delete-contact
-	 */
-	public function delete( int $contact_id ) {
-
-		return $this->get_client()->delete(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'contacts', $contact_id )
+			[ 'contactList' => $data ]
 		);
 
 	}

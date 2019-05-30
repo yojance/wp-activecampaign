@@ -5,6 +5,7 @@
  * PHP version 7.2
  *
  * @package WPS\ActiveCampaign
+ * @status  Implemented, Not Tested
  */
 
 namespace WPS\ActiveCampaign;
@@ -12,8 +13,6 @@ namespace WPS\ActiveCampaign;
 use WP_Error;
 
 /**
- * Class Addresses
- *
  * Addresses
  *
  * Every campaign sent via ActiveCampaign is required to have a physical mailing address associated with it.
@@ -21,22 +20,36 @@ use WP_Error;
  * as well as associate an address with a specific list or user group.
  *
  * @package WPS\ActiveCampaign
+ * @status  Implemented, Not Tested
  */
 class Addresses extends Resource {
 
 	/**
+	 * Addresses constructor.
+	 *
+	 * @param WP_Client $client HTTP Client.
+	 */
+	public function __construct( $client ) {
+
+		$this->resource = 'addresses';
+
+		parent::__construct( $client );
+
+	}
+
+	/**
 	 * Create an address
 	 *
-	 * @param array $address Address fields.
+	 * @param array $data Address fields.
 	 *
 	 * @return array|WP_Error
 	 * @link https://developers.activecampaign.com/reference#testinput
 	 */
-	public function create( array $address ) {
+	public function create( array $data ) {
 
 		return $this->get_client()->post(
-			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'addresses' ),
-			[ 'address' => $address ]
+			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), $this->resource ),
+			[ 'address' => $data ]
 		);
 
 	}
@@ -49,10 +62,10 @@ class Addresses extends Resource {
 	 * @return array|WP_Error
 	 * @link https://developers.activecampaign.com/reference#retrieve-an-address
 	 */
-	public function get( $id ) {
+	public function get( int $id ) {
 
 		return $this->get_client()->get(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'addresses', $id )
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $id )
 		);
 
 	}
@@ -60,17 +73,17 @@ class Addresses extends Resource {
 	/**
 	 * Update an address
 	 *
-	 * @param int   $unique_id    ID of the Address being changed.
-	 * @param array $updated_data Updated data.
+	 * @param int   $id      ID of the Address being changed.
+	 * @param array $updates Updated data.
 	 *
 	 * @return array|WP_Error
 	 * @link https://developers.activecampaign.com/reference#update-an-address-2
 	 */
-	public function update( $unique_id, $updated_data ) {
+	public function update( int $id, array $updates ) {
 
 		return $this->get_client()->put(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'addresses', $unique_id ),
-			$updated_data
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $id ),
+			$updates
 		);
 
 	}
@@ -89,7 +102,7 @@ class Addresses extends Resource {
 	public function delete( int $id ) {
 
 		return $this->get_client()->delete(
-			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), 'addresses', $id )
+			sprintf( '%s/%s/%d', $this->get_client()->get_base_endpoint(), $this->resource, $id )
 		);
 
 	}
@@ -132,10 +145,10 @@ class Addresses extends Resource {
 	 * @return array|WP_Error
 	 * @link https://developers.activecampaign.com/reference#list-all-addresses
 	 */
-	public function list_all() {
+	public function list() {
 
 		return $this->get_client()->get(
-			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), 'addresses' )
+			sprintf( '%s/%s', $this->get_client()->get_base_endpoint(), $this->resource )
 		);
 
 	}
